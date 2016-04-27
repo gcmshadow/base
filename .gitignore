@@ -19,3 +19,5 @@ tests/ptr
 tests/testModuleImporter1
 tests/testModuleImporterLib.py
 *_wrap.cc
+python/lsst/base/baseLib.py
+doc/xml
