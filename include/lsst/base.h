@@ -27,7 +27,7 @@
  *
  * Basic LSST definitions
  */
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 /**
  * A shared pointer to an object
@@ -38,12 +38,12 @@
  * \sa CONST_PTR
  */
 #define LSST_WHITESPACE /* White space to avoid swig converting vector<PTR(XX)> into vector<shared_ptr<XX>> */
-#define PTR(...) boost::shared_ptr<__VA_ARGS__ LSST_WHITESPACE > LSST_WHITESPACE
+#define PTR(...) std::shared_ptr<__VA_ARGS__ LSST_WHITESPACE > LSST_WHITESPACE
 /**
  * A shared pointer to a const object
  *
  * \sa PTR
  */
-#define CONST_PTR(...) boost::shared_ptr<const __VA_ARGS__ LSST_WHITESPACE > LSST_WHITESPACE
+#define CONST_PTR(...) std::shared_ptr<const __VA_ARGS__ LSST_WHITESPACE > LSST_WHITESPACE
 
 #endif
