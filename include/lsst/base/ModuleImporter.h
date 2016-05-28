@@ -32,8 +32,6 @@
 
 #include <string>
 
-#include "boost/noncopyable.hpp"
-
 namespace lsst { namespace base {
 
 /**
@@ -45,11 +43,19 @@ namespace lsst { namespace base {
  *  module is imported.  That machinery keeps us from calling Python C-API
  *  functions from standalone C++ binaries that aren't linked with Python.
  */
-class ModuleImporter : private boost::noncopyable {
+class ModuleImporter {
 public:
 
     /// Import the given Python module, and return true if successful.
     static bool import(std::string const & name);
+
+    // No copying
+    ModuleImporter (const ModuleImporter&) = delete;
+    ModuleImporter& operator=(const ModuleImporter&) = delete;
+
+    // No moving
+    ModuleImporter (ModuleImporter&&) = delete;
+    ModuleImporter& operator=(ModuleImporter&&) = delete;
 
 protected:
 
