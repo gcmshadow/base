@@ -108,7 +108,7 @@ extern bool const haveMkl = loadMkl();
 
 void setNumThreads(unsigned int numThreads)
 {
-    if (!haveOpenBlas && !haveMkl) {
+    if (!haveOpenBlas && !haveMkl && numThreads != 0 && numThreads != 1) {
         throw NoThreadsException();
     }
     if (haveOpenBlas) {
