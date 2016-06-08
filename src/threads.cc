@@ -1,42 +1,41 @@
-#include <dlfcn.h>
 #include <cstddef>
 #include <cstdlib>
 
 #include <iostream>
 
+#include "lsst/base/library.h"
 #include "lsst/base/threads.h"
-
-#ifndef RTLD_DEEPBIND // Non-POSIX flag, so it may not exist
-#define RTLD_DEEPBIND 0 // Will be ignored
-#endif
 
 namespace lsst {
 namespace base {
 
 namespace {
 
-typedef int (*Getter)(void);
-typedef void (*Setter)(int);
+typedef int (Getter)(void);
+typedef void (Setter)(int);
 
-Getter getOpenBlasThreads = NULL;
-Setter setOpenBlasThreads = NULL;
-Getter getMklThreads = NULL;
-Setter setMklThreads = NULL;
+Getter* getOpenBlasThreads = NULL;
+Setter* setOpenBlasThreads = NULL;
+Getter* getMklThreads = NULL;
+Setter* setMklThreads = NULL;
 
 bool loadOpenBlas() {
     if (haveOpenBlas) {
         return true;
     }
 
-    void* openblas = dlopen("libopenblas.so", RTLD_LAZY | RTLD_LOCAL | RTLD_DEEPBIND);
-    if (!openblas) return false;
-
-    // Believe it or not, the function which returns the number of threads that OpenBLAS will actually use is
-    // called "goto_get_num_procs". The number returned by THIS function, and not "openblas_get_num_threads"
-    // nor "openblas_get_num_procs", is modified by calls to "openblas_set_num_threads". Confused? Me too.
-    (void*&)getOpenBlasThreads = dlsym(openblas, "goto_get_num_procs");
-    (void*&)setOpenBlasThreads = dlsym(openblas, "openblas_set_num_threads");
-    return getOpenBlasThreads && setOpenBlasThreads;
+    try {
+        getOpenBlasThreads = loadSymbol<Getter>("libopenblas", "goto_get_num_procs");
+        // Believe it or not, the function which returns the number of threads
+        // that OpenBLAS will actually use is called "goto_get_num_procs". The
+        // number returned by THIS function, and not "openblas_get_num_threads"
+        // nor "openblas_get_num_procs", is modified by calls to
+        // "openblas_set_num_threads". Confused? Me too.
+        setOpenBlasThreads = loadSymbol<Setter>("libopenblas", "openblas_set_num_threads");
+    } catch (LibraryException const&) {
+        return false;
+    }
+    return true;
 }
 
 bool loadMkl() {
@@ -44,27 +43,26 @@ bool loadMkl() {
         return true;
     }
 
-    if (!dlopen("libmkl_core.so", RTLD_LAZY | RTLD_GLOBAL)) {
+    if (!canLoadLibrary("libmkl_core")) {
         return false;
     }
 
     // We will set the number of threads through OMP because that's easier.
     // (There are multiple mkl libraries, and each has a function to set the number of threads.)
-    void* omp = dlopen("libiomp5.so", RTLD_LAZY | RTLD_GLOBAL);
-    if (!omp) {
+    try {
+        getMklThreads = loadSymbol<Getter>("libiomp5", "omp_get_max_threads");
+        setMklThreads = loadSymbol<Setter>("libiomp5", "omp_set_num_threads");
+    } catch (LibraryException const&) {
         return false;
     }
-
-    (void*&)getMklThreads = dlsym(omp, "omp_get_max_threads");
-    (void*&)setMklThreads = dlsym(omp, "omp_set_num_threads");
-    return getMklThreads && setMklThreads;
+    return true;
 }
 
 bool disableImplicitThreadingImpl(
     std::string const& package,                    // Name of package
     std::initializer_list<std::string const> envvars, // Environment variables to check
-    Getter getter,                      // Function to get number of threads
-    Setter setter                       // Function to set number of threads
+    Getter* getter,                      // Function to get number of threads
+    Setter* setter                       // Function to set number of threads
     )
 {
     for (auto&& ss : envvars) {
