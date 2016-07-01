@@ -1,5 +1,6 @@
 setupRequired(sconsUtils)
-setupRequired(swig)
+setupRequired(pybind11)
+setupRequired(python)
 setupRequired(python_future)
 setupOptional(doxygen)
 

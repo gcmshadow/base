@@ -1,3 +1,4 @@
 from .version import *
-from .baseLib import *
+from ._threads import *
+from ._versions import *
 from .packages import *
