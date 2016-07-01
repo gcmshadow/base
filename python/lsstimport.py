@@ -68,6 +68,8 @@ if RTLD_NOW is None:
 
 DLFLAGS = RTLD_GLOBAL | RTLD_NOW
 
+# Note: Unsure if the following is still needed with pybind11
+
 # Swigged python libraries that import other swigged python libraries
 # need to import with RTLD_GLOBAL and RTLD_NOW set.  This causes
 # problems with symbol collisions in third party packages (notably
