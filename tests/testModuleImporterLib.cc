@@ -1,6 +1,6 @@
 /* 
  * LSST Data Management System
- * Copyright 2008, 2009, 2010 LSST Corporation.
+ * Copyright 2008-2016  AURA/LSST.
  * 
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
@@ -17,19 +17,24 @@
  * 
  * You should have received a copy of the LSST License Statement and 
  * the GNU General Public License along with this program.  If not, 
- * see <http://www.lsstcorp.org/LegalNotices/>.
+ * see <https://www.lsstcorp.org/LegalNotices/>.
  */
 
-%module testModuleImporterLib
+#include "pybind11/pybind11.h"
 
-%{
 #include "lsst/base/ModuleImporter.h"
-%}
 
-%inline {
+namespace py = pybind11;
 
 bool doImport(char const * name) {
     return lsst::base::ModuleImporter::import(name);
 }
 
+PYBIND11_PLUGIN(_testModuleImporterLib) {
+    pybind11::module mod("_testModuleImporterLib", "Tests for ModuleImporter");
+    
+    mod.def("doImport", &doImport);
+
+    return mod.ptr();
 }
+

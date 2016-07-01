@@ -1,6 +1,6 @@
 /*
  * LSST Data Management System
- * Copyright 2008-2013 LSST Corporation.
+ * Copyright 2008-2016  AURA/LSST.
  *
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
@@ -17,30 +17,32 @@
  *
  * You should have received a copy of the LSST License Statement and
  * the GNU General Public License along with this program.  If not,
- * see <http://www.lsstcorp.org/LegalNotices/>.
+ * see <https://www.lsstcorp.org/LegalNotices/>.
  */
 
-%module lsstcppimport
+#include "pybind11/pybind11.h"
 
-%{
 #include "lsst/base/ModuleImporter.h"
 
-namespace lsst { namespace base {
+namespace lsst {
+namespace base {
 
 class PythonModuleImporter : public ModuleImporter {
 public:
-    static ModuleImporter const * get() {
+    static ModuleImporter const* get() {
         static PythonModuleImporter const instance;
         return &instance;
     }
+
 private:
     PythonModuleImporter() {}
+
 protected:
-    virtual bool _import(std::string const & name) const;
+    virtual bool _import(std::string const& name) const;
 };
 
-bool PythonModuleImporter::_import(std::string const & name) const {
-    PyObject * mod = PyImport_ImportModule(name.c_str());
+bool PythonModuleImporter::_import(std::string const& name) const {
+    PyObject* mod = PyImport_ImportModule(name.c_str());
     if (mod) {
         Py_DECREF(mod);
         return true;
@@ -53,13 +55,16 @@ bool PythonModuleImporter::_import(std::string const & name) const {
     return false;
 }
 
-void installPythonModuleImporter() {
-    ModuleImporter::install(PythonModuleImporter::get());
+void installPythonModuleImporter() { ModuleImporter::install(PythonModuleImporter::get()); }
 }
+}  // namespace lsst::base
 
-}} // namespace lsst::base
-%}
+namespace py = pybind11;
 
-%init %{
+PYBIND11_PLUGIN(_lsstcppimport) {
+    py::module mod("_lsstcppimport", "Access to the classes from the lsstcppimport library");
+
     lsst::base::installPythonModuleImporter();
-%}
+
+    return mod.ptr();
+}
