@@ -1,6 +1,7 @@
 setupRequired(boost)
 setupRequired(sconsUtils)
 setupRequired(swig)
+setupRequired(python_future)
 setupOptional(doxygen)
 
 envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
