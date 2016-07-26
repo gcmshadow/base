@@ -93,20 +93,20 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.extra(packages), {})
 
         # Now load an obscure python package and the list of packages should change
-        import xmlrpc.client  # Shouldn't be used by anything we've previously imported
+        import smtpd # Shouldn't be used by anything we've previously imported
         new = lsst.base.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
         self.assertGreater(len(missing), 0)  # 'packages' should be missing some stuff in 'new'
-        self.assertIn("xmlrpc.client", missing)
+        self.assertIn("smtpd", missing)
 
         # Inverted comparisons
         self.assertDictEqual(new.difference(packages), {})
         self.assertDictEqual(new.missing(packages), {})  # Nothing in 'new' that's not in 'packages'
         extra = new.extra(packages)
         self.assertGreater(len(extra), 0)  # 'new' has extra stuff compared to 'packages'
-        self.assertIn("xmlrpc.client", extra)
+        self.assertIn("smtpd", extra)
 
         packages.update(new)  # Should now be identical
         self.assertDictEqual(packages.difference(new), {})
