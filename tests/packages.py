@@ -44,8 +44,7 @@ class PackagesTestCase(unittest.TestCase):
     def testPython(self):
         """Test that we get the right version for this python package"""
         versions = lsst.base.getPythonPackages()
-        expected = (lsst.base.version.__version__ + " with boost=" +
-                    lsst.base.version.__dependency_versions__["boost"])
+        expected = (lsst.base.version.__version__)
         self.assertEqual(versions["base"], expected)
 
     def testEnvironment(self):
