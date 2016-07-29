@@ -24,11 +24,11 @@ from future import standard_library
 standard_library.install_aliases()
 
 import os
-import sys
 import unittest
 import tempfile
 
 import lsst.base
+
 
 class PackagesTestCase(unittest.TestCase):
     """Tests for package version collection
@@ -92,7 +92,7 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.extra(packages), {})
 
         # Now load an obscure python package and the list of packages should change
-        import smtpd # Shouldn't be used by anything we've previously imported
+        import smtpd  # noqa Shouldn't be used by anything we've previously imported
         new = lsst.base.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'

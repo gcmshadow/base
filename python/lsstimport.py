@@ -91,9 +91,9 @@ if 'orig_imp_load_module' not in locals():
         # python/lsst as that is how to know if you are in an LSST
         # package.
         lsstIdx = [i for i, el in enumerate(pathParts) if el == 'python']
-        if pathParts[-1] in LIB_EXCEPTION_LIST or (extension in SHARED_LIB_EXTENSION_LIST
-                                                   and pathParts[-1].startswith('_')
-                                                   and 'lsst' in [pathParts[i+1] for i in lsstIdx]):
+        if pathParts[-1] in LIB_EXCEPTION_LIST or (extension in SHARED_LIB_EXTENSION_LIST and
+                                                   pathParts[-1].startswith('_') and
+                                                   'lsst' in [pathParts[i+1] for i in lsstIdx]):
             # Get currently set flags
             originalDLFlags = sys.getdlopenflags()
             # Set flags
