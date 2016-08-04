@@ -30,13 +30,16 @@ Example usage:
     old.update(pkgs)  # Include any new packages in the old
     old.write("/path/to/packages.pickle")
 """
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
 import os
 import sys
 import hashlib
 import importlib
 import subprocess
-import cPickle as pickle
+import pickle as pickle
 from collections import Mapping
 
 from .baseLib import getRuntimeVersions
@@ -69,10 +72,11 @@ def getVersionFromPythonModule(module):
     if hasattr(module, "__dependency_versions__"):
         # Add build-time dependencies
         deps = module.__dependency_versions__
-        buildtime = BUILDTIME & set(deps.iterkeys())
+        buildtime = BUILDTIME & set(deps.keys())
         if buildtime:
             version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in buildtime)
     return version
+
 
 def getPythonPackages():
     """Return a dict of imported python packages and their versions
@@ -92,7 +96,7 @@ def getPythonPackages():
 
     packages = {"python": sys.version}
     # Not iterating with sys.modules.iteritems() because it's not atomic and subject to race conditions
-    moduleNames = sys.modules.keys()
+    moduleNames = list(sys.modules.keys())
     for name in moduleNames:
         module = sys.modules[name]
         try:
@@ -121,6 +125,7 @@ def getPythonPackages():
         packages[name] = ver
 
     return packages
+
 
 _eups = None  # Singleton Eups object
 def getEnvironmentPackages():
@@ -164,7 +169,7 @@ def getEnvironmentPackages():
             diffCmd = ["git", "--no-pager", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "diff",
                        "--patch"]
             try:
-                rev = subprocess.check_output(revCmd).strip()
+                rev = subprocess.check_output(revCmd).decode().strip()
                 diff = subprocess.check_output(diffCmd)
             except:
                 ver += "@GIT_ERROR"
@@ -192,7 +197,7 @@ class Packages(object):
         """
         assert isinstance(packages, Mapping)
         self._packages = packages
-        self._names = set(packages.iterkeys())
+        self._names = set(packages.keys())
 
     @classmethod
     def fromSystem(cls):
@@ -210,12 +215,12 @@ class Packages(object):
     @classmethod
     def read(cls, filename):
         """Read packages from filename"""
-        with open(filename, "r") as ff:
+        with open(filename, "rb") as ff:
             return pickle.load(ff)
 
     def write(self, filename):
         """Write packages to file"""
-        with open(filename, "w") as ff:
+        with open(filename, "wb") as ff:
             pickle.dump(self, ff)
 
     def __len__(self):

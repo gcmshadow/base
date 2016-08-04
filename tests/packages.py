@@ -20,13 +20,15 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
+from future import standard_library
+standard_library.install_aliases()
 
 import os
-import sys
 import unittest
 import tempfile
 
 import lsst.base
+
 
 class PackagesTestCase(unittest.TestCase):
     """Tests for package version collection
@@ -42,8 +44,7 @@ class PackagesTestCase(unittest.TestCase):
     def testPython(self):
         """Test that we get the right version for this python package"""
         versions = lsst.base.getPythonPackages()
-        expected = (lsst.base.version.__version__ + " with boost=" +
-                    lsst.base.version.__dependency_versions__["boost"])
+        expected = (lsst.base.version.__version__)
         self.assertEqual(versions["base"], expected)
 
     def testEnvironment(self):
@@ -91,20 +92,20 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.extra(packages), {})
 
         # Now load an obscure python package and the list of packages should change
-        import xmlrpclib  # Shouldn't be used by anything we've previously imported
+        import smtpd  # noqa Shouldn't be used by anything we've previously imported
         new = lsst.base.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
         self.assertGreater(len(missing), 0)  # 'packages' should be missing some stuff in 'new'
-        self.assertIn("xmlrpclib", missing)
+        self.assertIn("smtpd", missing)
 
         # Inverted comparisons
         self.assertDictEqual(new.difference(packages), {})
         self.assertDictEqual(new.missing(packages), {})  # Nothing in 'new' that's not in 'packages'
         extra = new.extra(packages)
         self.assertGreater(len(extra), 0)  # 'new' has extra stuff compared to 'packages'
-        self.assertIn("xmlrpclib", extra)
+        self.assertIn("smtpd", extra)
 
         packages.update(new)  # Should now be identical
         self.assertDictEqual(packages.difference(new), {})
