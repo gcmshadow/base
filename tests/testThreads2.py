@@ -22,17 +22,25 @@
 #
 
 import unittest
-import _testModuleImporterLib as testModuleImporterLib
 
+from past.builtins import long
 
-class ModuleImporterTestCase(unittest.TestCase):
+class ThreadsTestCase(unittest.TestCase):
 
-    def testImporter(self):
-        # Before we import lsst, the functionality to import Python modules from C++ should not work.
-        self.assertFalse(testModuleImporterLib.doImport("math"))
-        # ...but after we import lsst (and lsstimport and lsstcppimport), it should.`
-        import lsst
-        self.assertTrue(testModuleImporterLib.doImport("math"))
+    def testApi(self):
+        from lsst.base import haveThreads
+        self.assertIsInstance(haveThreads(), bool)
+
+        from lsst.base import setNumThreads
+# Raises lsst::base::NoThreadsException which is untranslated
+# when threading library is missing, this needs fixing!
+#        self.assertIs(setNumThreads(4), None)
+
+        from lsst.base import getNumThreads 
+        self.assertIsInstance(getNumThreads(), (int, long))
+
+        from lsst.base import disableImplicitThreading
+        self.assertIsInstance(disableImplicitThreading(), bool)
 
 if __name__ == "__main__":
     unittest.main()
