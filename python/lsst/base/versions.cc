@@ -27,8 +27,11 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_versions) {
-    py::module mod("_versions", "Access to the classes from the versions library");
+namespace lsst {
+namespace base {
+
+PYBIND11_PLUGIN(versions) {
+    py::module mod("versions");
 
     mod.def("getRuntimeVersions", &lsst::base::getRuntimeVersions);
     mod.def("getCfitsioVersion", &lsst::base::getCfitsioVersion);
@@ -38,3 +41,6 @@ PYBIND11_PLUGIN(_versions) {
 
     return mod.ptr();
 }
+
+}  // lsst
+}  // base
