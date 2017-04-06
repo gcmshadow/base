@@ -26,10 +26,12 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_threads) {
-    py::module mod("_threads", "Access to the classes from the threads library");
+namespace lsst {
+namespace base {
 
-    mod.def("test", []() { return 1; });
+PYBIND11_PLUGIN(threads) {
+    py::module mod("threads");
+
     mod.def("haveThreads", &lsst::base::haveThreads);
     mod.def("setNumThreads", &lsst::base::setNumThreads);
     mod.def("getNumThreads", &lsst::base::getNumThreads);
@@ -37,3 +39,6 @@ PYBIND11_PLUGIN(_threads) {
 
     return mod.ptr();
 }
+
+}  // lsst
+}  // base
