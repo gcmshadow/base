@@ -112,6 +112,16 @@ if 'orig_imp_load_module' not in locals():
 try:
     import lsstcppimport
 except ImportError:
-    print(
-        "Could not import lsstcppimport; please ensure the base package has been built (not just setup).\n",
-        file=sys.stderr)
+    # The lsstcppimport may have failed because we're inside Scons.
+    # If we are, then don't worry about it
+    try:
+        import SCons.Script
+    # If we're not, then
+    #   a) we will get an ImportError trying to import SCons.Script
+    #   b) and will know that the first ImportError really is a problem
+    #        and we should let the user know.
+    except ImportError:
+        print(
+            "Could not import lsstcppimport;"
+            " please ensure the base package has been built (not just setup).\n",
+            file=sys.stderr)
