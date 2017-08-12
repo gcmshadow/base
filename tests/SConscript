@@ -3,4 +3,4 @@ from lsst.sconsUtils import scripts
 
 scripts.BasicSConscript.pybind11(['testModuleImporterLib'])
 scripts.BasicSConscript.tests(noBuildList=['testModuleImporterLib.cc'],
-                              pySingles=['testModuleImporter2.py'],)
+                              pySingles=['testModuleImporter2.py'], pyList=[])
