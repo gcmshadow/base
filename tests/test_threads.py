@@ -25,22 +25,24 @@ import unittest
 
 from past.builtins import long
 
+
 class ThreadsTestCase(unittest.TestCase):
 
     def testApi(self):
         from lsst.base import haveThreads
         self.assertIsInstance(haveThreads(), bool)
 
-        from lsst.base import setNumThreads
+        from lsst.base import setNumThreads  # noqa F401
 # Raises lsst::base::NoThreadsException which is untranslated
 # when threading library is missing, this needs fixing!
 #        self.assertIs(setNumThreads(4), None)
 
-        from lsst.base import getNumThreads 
+        from lsst.base import getNumThreads
         self.assertIsInstance(getNumThreads(), (int, long))
 
         from lsst.base import disableImplicitThreading
         self.assertIsInstance(disableImplicitThreading(), bool)
+
 
 if __name__ == "__main__":
     unittest.main()

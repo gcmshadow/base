@@ -94,7 +94,7 @@ if 'orig_imp_load_module' not in locals():
         lsstIdx = [i for i, el in enumerate(pathParts) if el == 'python']
         if pathParts[-1] in LIB_EXCEPTION_LIST or (extension in SHARED_LIB_EXTENSION_LIST and
                                                    pathParts[-1].startswith('_') and
-                                                   'lsst' in [pathParts[i+1] for i in lsstIdx]):
+                                                   'lsst' in [pathParts[i + 1] for i in lsstIdx]):
             # Get currently set flags
             originalDLFlags = sys.getdlopenflags()
             # Set flags
@@ -110,12 +110,12 @@ if 'orig_imp_load_module' not in locals():
     imp.load_module = imp_load_module
 
 try:
-    import lsstcppimport
+    import lsstcppimport  # noqa F401
 except ImportError:
     # The lsstcppimport may have failed because we're inside Scons.
     # If we are, then don't worry about it
     try:
-        import SCons.Script
+        import SCons.Script  # noqa F401
     # If we're not, then
     #   a) we will get an ImportError trying to import SCons.Script
     #   b) and will know that the first ImportError really is a problem
