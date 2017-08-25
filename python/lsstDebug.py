@@ -21,6 +21,7 @@ from builtins import object
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+
 #
 # Define a class to configure debugging information
 #
@@ -61,7 +62,9 @@ lsstDebug.Info = DebugInfo
         """Set the value of the variable "what" in self.__modname to value"""
         self._dict[what] = value
 
+
 getInfo = Info
+
 
 def getDebugFrame(debugDisplay, name):
     """
