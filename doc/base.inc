@@ -836,8 +836,10 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
+# While pybind11 wrappers should be documented, Doxygen won't do it correctly
 EXCLUDE_PATTERNS       = */.svn \
-                         */.sconf_temp
+                         */.sconf_temp \
+                         */python/*.cc
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
