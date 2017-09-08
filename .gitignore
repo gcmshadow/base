@@ -8,6 +8,7 @@ config.log
 *.cfgc
 *.pyc
 .cache
+pytest_session.txt
 lib/libbase.*
 python/lsst/base/version.py
 python/lsst64defs.py
