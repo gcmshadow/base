@@ -9,6 +9,7 @@ config.log
 *.pyc
 .cache
 pytest_session.txt
+.coverage
 lib/libbase.*
 python/lsst/base/version.py
 python/lsst64defs.py
