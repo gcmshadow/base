@@ -30,11 +30,7 @@ bool doImport(char const * name) {
     return lsst::base::ModuleImporter::import(name);
 }
 
-PYBIND11_PLUGIN(_testModuleImporterLib) {
-    pybind11::module mod("_testModuleImporterLib", "Tests for ModuleImporter");
-    
+PYBIND11_MODULE(_testModuleImporterLib, mod) {
     mod.def("doImport", &doImport);
-
-    return mod.ptr();
 }
 
