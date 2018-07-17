@@ -26,9 +26,13 @@
 
 namespace py = pybind11;
 
+namespace {
+
 bool doImport(char const * name) {
     return lsst::base::ModuleImporter::import(name);
 }
+
+}  // namespace
 
 PYBIND11_MODULE(_testModuleImporterLib, mod) {
     mod.def("doImport", &doImport);
