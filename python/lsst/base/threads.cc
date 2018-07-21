@@ -29,15 +29,11 @@ namespace py = pybind11;
 namespace lsst {
 namespace base {
 
-PYBIND11_PLUGIN(threads) {
-    py::module mod("threads");
-
+PYBIND11_MODULE(threads, mod) {
     mod.def("haveThreads", &lsst::base::haveThreads);
     mod.def("setNumThreads", &lsst::base::setNumThreads);
     mod.def("getNumThreads", &lsst::base::getNumThreads);
     mod.def("disableImplicitThreading", &lsst::base::disableImplicitThreading);
-
-    return mod.ptr();
 }
 
 }  // lsst

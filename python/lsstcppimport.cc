@@ -61,10 +61,6 @@ void installPythonModuleImporter() { ModuleImporter::install(PythonModuleImporte
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_lsstcppimport) {
-    py::module mod("_lsstcppimport", "Access to the classes from the lsstcppimport library");
-
+PYBIND11_MODULE(_lsstcppimport, mod) {
     lsst::base::installPythonModuleImporter();
-
-    return mod.ptr();
 }

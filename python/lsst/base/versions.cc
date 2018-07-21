@@ -30,16 +30,12 @@ namespace py = pybind11;
 namespace lsst {
 namespace base {
 
-PYBIND11_PLUGIN(versions) {
-    py::module mod("versions");
-
+PYBIND11_MODULE(versions, mod) {
     mod.def("getRuntimeVersions", &lsst::base::getRuntimeVersions);
     mod.def("getCfitsioVersion", &lsst::base::getCfitsioVersion);
     mod.def("getFftwVersion", &lsst::base::getFftwVersion);
     mod.def("getWcslibVersion", &lsst::base::getWcslibVersion);
     mod.def("getGslVersion", &lsst::base::getGslVersion);
-
-    return mod.ptr();
 }
 
 }  // lsst
