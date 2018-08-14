@@ -1,4 +1,3 @@
-from builtins import object
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -25,7 +24,7 @@ from builtins import object
 #
 # Define a class to configure debugging information
 #
-class Info(object):
+class Info:
     """An object cognisant of debugging parameters appropriate for module "name"; any request for a value
 will return False unless that value has been set, either in the module or as an attribute of this object.
 

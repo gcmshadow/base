@@ -23,21 +23,11 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-from __future__ import absolute_import, division, print_function
 import sys
 import imp
 import functools
 import importlib
 import os.path
-
-# Ensure that the Python3 package library reorganization is available
-# to Python 2. It's okay if this doesn't work, and it won't work if SCons
-# is importing this and SCons has no access to the future package.
-try:
-    from future import standard_library
-    standard_library.install_aliases()
-except ImportError:
-    pass
 
 # List of extensions to set global flags.  May need to be extended
 # for systems other than *nix and OSX.

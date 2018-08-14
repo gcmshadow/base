@@ -23,8 +23,6 @@
 
 import unittest
 
-from past.builtins import long
-
 
 class ThreadsTestCase(unittest.TestCase):
 
@@ -38,7 +36,7 @@ class ThreadsTestCase(unittest.TestCase):
 #        self.assertIs(setNumThreads(4), None)
 
         from lsst.base import getNumThreads
-        self.assertIsInstance(getNumThreads(), (int, long))
+        self.assertIsInstance(getNumThreads(), int)
 
         from lsst.base import disableImplicitThreading
         self.assertIsInstance(disableImplicitThreading(), bool)
