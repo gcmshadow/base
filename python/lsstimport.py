@@ -23,6 +23,10 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
+"""Configure Python library loader to support LSST shared libraries."""
+
+__all__ = []
+
 import sys
 import imp
 import functools
