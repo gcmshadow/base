@@ -9,5 +9,6 @@ base documentation preview
 .. toctree::
    :maxdepth: 1
 
+   lsstDebug/index
    base/index
    lsst.base/index
