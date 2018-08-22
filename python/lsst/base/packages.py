@@ -162,7 +162,7 @@ def getEnvironmentPackages():
         from eups import Eups
         from eups.Product import Product
     except ImportError:
-        log.warning("Unable to import eups, so cannot determine package versions from environment")
+        logging.warning("Unable to import eups, so cannot determine package versions from environment")
         return {}
 
     # Cache eups object since creating it can take a while
