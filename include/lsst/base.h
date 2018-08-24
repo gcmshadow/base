@@ -46,4 +46,11 @@
  */
 #define CONST_PTR(...) std::shared_ptr<const __VA_ARGS__ LSST_WHITESPACE > LSST_WHITESPACE
 
+/**
+ * Make a symbol visible even if visiblity is hidden (e.g. for pybind11 modules)
+ *
+ * This implementation works for gcc and clang; it has not been tested for other compilers
+ */
+# define LSST_EXPORT __attribute__ ((visibility("default")))
+
 #endif
