@@ -53,4 +53,16 @@
  */
 # define LSST_EXPORT __attribute__ ((visibility("default")))
 
+/**
+ * Make a symbol hidden even if default visiblity is public.
+ *
+ * This implementation works for gcc and clang; it has not been tested for other compilers.
+ *
+ * This macro should be used for most utility code for pybind11 wrapping (at
+ * least non-template, non-inline code).  It can also be used in non-pybind11
+ * code to make a symbol private to a library without also forcing it to be
+ * private to a single source file.
+ */
+# define LSST_PRIVATE __attribute__ ((visibility("hidden")))
+
 #endif
