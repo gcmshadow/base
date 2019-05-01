@@ -27,6 +27,7 @@ import _testModuleImporterLib as testModuleImporterLib
 
 class ModuleImporterTestCase(unittest.TestCase):
 
+    @unittest.skip("test removing lsstimport")
     def testImporter(self):
         # Before we import lsst, the functionality to import Python modules from C++ should not work.
         self.assertFalse(testModuleImporterLib.doImport("math"))
