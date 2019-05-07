@@ -39,6 +39,7 @@ bool loadOpenBlas() {
 }
 
 bool loadMkl() {
+    return false;
     if (haveMkl) {
         return true;
     }
