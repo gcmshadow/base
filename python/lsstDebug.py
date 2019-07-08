@@ -21,6 +21,15 @@
 #
 __all__ = ("Info", "getDebugFrame")
 
+_lsstDebugVariables = {}
+
+def dumpLsstVariables():
+    print("LsstVariables:")
+    for k, v in _lsstDebugVariables.items():
+        print("%-60s %s" % (k, v))
+
+import atexit
+atexit.register(dumpLsstVariables)
 
 #
 # Define a class to configure debugging information
@@ -71,11 +80,13 @@ class Info:
     def __init__(self, modname):
         import sys
         self.__dict__["_dict"] = sys.modules[modname].__dict__
+        self.__dict__["_modname"] = modname
         self._modname = modname
 
     def __getattr__(self, what):
         """Return the value of the variable "what" in ``self.__modname``
         if set, else False"""
+        _lsstDebugVariables[self.__dict__["_modname"]] = what
         return self._dict.get(what, False)
 
     def __setattr__(self, what, value):
