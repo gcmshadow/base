@@ -12,7 +12,6 @@ pytest_session.txt
 .coverage
 lib/libbase.*
 python/lsst/base/version.py
-python/lsst64defs.py
 doc/html
 doc/doxygen.conf
 doc/base.tag
