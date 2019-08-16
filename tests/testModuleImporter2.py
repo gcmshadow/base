@@ -22,7 +22,7 @@
 #
 
 import unittest
-import _testModuleImporterLib as testModuleImporterLib
+import testModuleImporterLib
 
 
 class ModuleImporterTestCase(unittest.TestCase):

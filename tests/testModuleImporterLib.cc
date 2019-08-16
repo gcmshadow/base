@@ -34,7 +34,6 @@ bool doImport(char const * name) {
 
 }  // namespace
 
-PYBIND11_MODULE(_testModuleImporterLib, mod) {
+PYBIND11_MODULE(testModuleImporterLib, mod) {
     mod.def("doImport", &doImport);
 }
-
