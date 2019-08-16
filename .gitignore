@@ -20,3 +20,4 @@ tests/.tests
 tests/ptr
 tests/testModuleImporter1
 doc/xml
+.pytest_cache
