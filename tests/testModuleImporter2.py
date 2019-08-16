@@ -30,8 +30,8 @@ class ModuleImporterTestCase(unittest.TestCase):
     def testImporter(self):
         # Before we import lsst, the functionality to import Python modules from C++ should not work.
         self.assertFalse(testModuleImporterLib.doImport("math"))
-        # ...but after we import lsst (and lsstimport and lsstcppimport), it should.`
-        import lsstcppimport  # noqa F401
+        # ...but after we import lsst.base.cppimport, it should.`
+        import lsst.base.cppimport  # noqa F401
         self.assertTrue(testModuleImporterLib.doImport("math"))
 
 
