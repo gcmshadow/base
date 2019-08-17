@@ -24,6 +24,8 @@
 
 #include "lsst/base/ModuleImporter.h"
 
+namespace py = pybind11;
+
 namespace lsst {
 namespace base {
 
@@ -56,11 +58,10 @@ bool PythonModuleImporter::_import(std::string const& name) const {
 }
 
 void installPythonModuleImporter() { ModuleImporter::install(PythonModuleImporter::get()); }
-}
-}  // namespace lsst::base
 
-namespace py = pybind11;
-
-PYBIND11_MODULE(_lsstcppimport, mod) {
+PYBIND11_MODULE(cppimport, mod) {
     lsst::base::installPythonModuleImporter();
 }
+
+}
+}  // namespace lsst::base
