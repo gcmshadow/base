@@ -28,6 +28,7 @@ import importlib
 import subprocess
 import logging
 import pickle as pickle
+import yaml
 from collections.abc import Mapping
 
 from .versions import getRuntimeVersions
@@ -285,14 +286,23 @@ class Packages:
         Parameters
         ----------
         filename : `str`
-            Filename from which to read.
+            Filename from which to read. The format is determined from the
+            file extension.  Currently support ``.pickle``, ``.pkl``
+            and ``.yaml``.
 
         Returns
         -------
         packages : `Packages`
         """
-        with open(filename, "rb") as ff:
-            return pickle.load(ff)
+        _, ext = os.path.splitext(filename)
+        if ext in (".pickle", ".pkl"):
+            with open(filename, "rb") as ff:
+                return pickle.load(ff)
+        elif ext == ".yaml":
+            with open(filename, "r") as ff:
+                return yaml.load(ff, Loader=yaml.SafeLoader)
+        else:
+            raise ValueError(f"Unable to determine how to read file {filename} from extension {ext}")
 
     def write(self, filename):
         """Write to file.
@@ -300,10 +310,19 @@ class Packages:
         Parameters
         ----------
         filename : `str`
-            Filename to which to write.
+            Filename to which to write. The format of the data file
+            is determined from the file extension. Currently supports
+            ``.pickle`` and ``.yaml``
         """
-        with open(filename, "wb") as ff:
-            pickle.dump(self, ff)
+        _, ext = os.path.splitext(filename)
+        if ext in (".pickle", ".pkl"):
+            with open(filename, "wb") as ff:
+                pickle.dump(self, ff)
+        elif ext == ".yaml":
+            with open(filename, "w") as ff:
+                yaml.dump(self, ff)
+        else:
+            raise ValueError(f"Unexpected file format requested: {ext}")
 
     def __len__(self):
         return len(self._packages)
@@ -324,6 +343,12 @@ class Packages:
 
     def __iter__(self):
         return iter(self._packages)
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+
+        return self._packages == other._packages
 
     def update(self, other):
         """Update packages with contents of another set of packages.
@@ -389,3 +414,22 @@ class Packages:
         """
         return {pkg: (self._packages[pkg], other._packages[pkg]) for
                 pkg in self._names & other._names if self._packages[pkg] != other._packages[pkg]}
+
+
+# Register YAML representers
+
+def pkg_representer(dumper, data):
+    """Represent Packages as a simple dict"""
+    return dumper.represent_mapping("lsst.base.Packages", data._packages,
+                                    flow_style=None)
+
+
+yaml.add_representer(Packages, pkg_representer)
+
+
+def pkg_constructor(loader, node):
+    yield Packages(loader.construct_mapping(node, deep=True))
+
+
+for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
+    yaml.add_constructor("lsst.base.Packages", pkg_constructor, Loader=loader)
