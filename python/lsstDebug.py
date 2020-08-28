@@ -46,8 +46,8 @@ class Info:
 
         lsstDebug.Info(__name__).display = True
 
-    Why is this interesting?  Because you can replace `lsstDebug.Info` with your
-    own version, e.g.
+    Why is this interesting?  Because you can replace `lsstDebug.Info` with
+    your own version, e.g.
 
     .. code-block:: python
 

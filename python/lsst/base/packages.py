@@ -28,25 +28,29 @@ import importlib
 import subprocess
 import logging
 import pickle as pickle
+import re
 import yaml
 from collections.abc import Mapping
+from functools import lru_cache
 
 from .versions import getRuntimeVersions
 
 log = logging.getLogger(__name__)
 
-__all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
+__all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages",
+           "getCondaPackages", "Packages"]
 
 
 # Packages used at build-time (e.g., header-only)
 BUILDTIME = set(["boost", "eigen", "tmv"])
 
 # Python modules to attempt to load so we can try to get the version
-# We do this because the version only appears to be available from python, but we use the library
+# We do this because the version only appears to be available from python,
+# but we use the library
 PYTHON = set(["galsim"])
 
-# Packages that don't seem to have a mechanism for reporting the runtime version
-# We need to guess the version from the environment
+# Packages that don't seem to have a mechanism for reporting the runtime
+# version.  We need to guess the version from the environment
 ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
 
 
@@ -110,7 +114,8 @@ def getPythonPackages():
             pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
-    # Not iterating with sys.modules.iteritems() because it's not atomic and subject to race conditions
+    # Not iterating with sys.modules.iteritems() because it's not atomic and
+    # subject to race conditions
     moduleNames = list(sys.modules.keys())
     for name in moduleNames:
         module = sys.modules[name]
@@ -120,7 +125,8 @@ def getPythonPackages():
             continue  # Can't get a version from it, don't care
 
         # Remove "foo.bar.version" in favor of "foo.bar"
-        # This prevents duplication when the __init__.py includes "from .version import *"
+        # This prevents duplication when the __init__.py includes
+        # "from .version import *"
         for ending in (".version", "._version"):
             if name.endswith(ending):
                 name = name[:-len(ending)]
@@ -130,8 +136,9 @@ def getPythonPackages():
                 assert ver == packages[name]
 
         # Use LSST package names instead of python module names
-        # This matches the names we get from the environment (i.e., EUPS) so we can clobber these build-time
-        # versions if the environment reveals that we're not using the packages as-built.
+        # This matches the names we get from the environment (i.e., EUPS)
+        # so we can clobber these build-time versions if the environment
+        # reveals that we're not using the packages as-built.
         if "lsst" in name:
             name = name.replace("lsst.", "").replace(".", "_")
 
@@ -143,6 +150,7 @@ def getPythonPackages():
 _eups = None  # Singleton Eups object
 
 
+@lru_cache(maxsize=1)
 def getEnvironmentPackages():
     """Get products and their versions from the environment.
 
@@ -173,13 +181,16 @@ def getEnvironmentPackages():
     products = _eups.findProducts(tags=["setup"])
 
     # Get versions for things we can't determine via runtime mechanisms
-    # XXX Should we just grab everything we can, rather than just a predetermined set?
+    # XXX Should we just grab everything we can, rather than just a
+    # predetermined set?
     packages = {prod.name: prod.version for prod in products if prod in ENVIRONMENT}
 
-    # The string 'LOCAL:' (the value of Product.LocalVersionPrefix) in the version name indicates uninstalled
-    # code, so the version could be different than what's being reported by the runtime environment (because
-    # we don't tend to run "scons" every time we update some python file, and even if we did sconsUtils
-    # probably doesn't check to see if the repo is clean).
+    # The string 'LOCAL:' (the value of Product.LocalVersionPrefix) in the
+    # version name indicates uninstalled code, so the version could be
+    # different than what's being reported by the runtime environment (because
+    # we don't tend to run "scons" every time we update some python file,
+    # and even if we did sconsUtils probably doesn't check to see if the repo
+    # is clean).
     for prod in products:
         if not prod.version.startswith(Product.LocalVersionPrefix):
             continue
@@ -187,7 +198,8 @@ def getEnvironmentPackages():
 
         gitDir = os.path.join(prod.dir, ".git")
         if os.path.exists(gitDir):
-            # get the git revision and an indication if the working copy is clean
+            # get the git revision and an indication if the working copy is
+            # clean
             revCmd = ["git", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "rev-parse", "HEAD"]
             diffCmd = ["git", "--no-pager", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "diff",
                        "--patch"]
@@ -207,27 +219,68 @@ def getEnvironmentPackages():
     return packages
 
 
+@lru_cache(maxsize=1)
+def getCondaPackages():
+    """Get products and their versions from the conda environment.
+
+    Returns
+    -------
+    packages : `dict`
+        Keys (type `str`) are product names; values (type `str`) are their
+        versions.
+
+    Notes
+    -----
+    Returns empty result if a conda environment is not in use or can not
+    be queried.
+    """
+
+    try:
+        import json
+        from conda.cli.python_api import Commands, run_command
+    except ImportError:
+        return {}
+
+    # Get the installed package list
+    versions_json = run_command(Commands.LIST, "--json")
+    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+
+    # Try to work out the conda environment name and include it as a fake
+    # package. The "obvious" way of running "conda info --json" does give
+    # access to the active_prefix but takes about 2 seconds to run.
+    # The equivalent to the code above would be:
+    #    info_json = run_command(Commands.INFO, "--json")
+    # As a comporomise look for the env name in the path to the python
+    # executable
+    match = re.search(r"/envs/(.*?)/bin/", sys.executable)
+    if match:
+        packages["conda_env"] = match.group(1)
+
+    return packages
+
+
 class Packages:
     """A table of packages and their versions.
 
-    There are a few different types of packages, and their versions are collected
-    in different ways:
+    There are a few different types of packages, and their versions are
+    collected in different ways:
 
     1. Run-time libraries (e.g., cfitsio, fftw): we get their version from
        interrogating the dynamic library
-    2. Python modules (e.g., afw, numpy; galsim is also in this group even though
-       we only use it through the library, because no version information is
-       currently provided through the library): we get their version from the
-       ``__version__`` module variable. Note that this means that we're only aware
-       of modules that have already been imported.
+    2. Python modules (e.g., afw, numpy; galsim is also in this group even
+       though we only use it through the library, because no version
+       information is currently provided through the library): we get their
+       version from the ``__version__`` module variable. Note that this means
+       that we're only aware of modules that have already been imported.
     3. Other packages provide no run-time accessible version information (e.g.,
-       astrometry_net): we get their version from interrogating the environment.
-       Currently, that means EUPS; if EUPS is replaced or dropped then we'll need
-       to consider an alternative means of getting this version information.
+       astrometry_net): we get their version from interrogating the
+       environment.  Currently, that means EUPS; if EUPS is replaced or dropped
+       then we'll need to consider an alternative means of getting this version
+       information.
     4. Local versions of packages (a non-installed EUPS package, selected with
-       ``setup -r /path/to/package``): we identify these through the environment
-       (EUPS again) and use as a version the path supplemented with the ``git``
-       SHA and, if the git repo isn't clean, an MD5 of the diff.
+       ``setup -r /path/to/package``): we identify these through the
+       environment (EUPS again) and use as a version the path supplemented with
+       the ``git`` SHA and, if the git repo isn't clean, an MD5 of the diff.
 
     These package versions are collected and stored in a Packages object, which
     provides useful comparison and persistence features.
@@ -278,6 +331,7 @@ class Packages:
         packages : `Packages`
         """
         packages = {}
+        packages.update(getCondaPackages())
         packages.update(getPythonPackages())
         packages.update(getRuntimeVersions())
         packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
