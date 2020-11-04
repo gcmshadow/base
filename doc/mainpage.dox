@@ -12,7 +12,7 @@ Functionality that shgould always be available to any LSST code
 /**
 \page baseDebug  Using lsstDebug to control debugging output
 
-The class \link lsstDebug\endlink can be used to turn on debugging output in a non-intrusive way.  For example,
+The class \link lsstDebug \endlink can be used to turn on debugging output in a non-intrusive way.  For example,
 the variable \c lsstDebug.Info("lsst.meas.astrom.astrom").debug is used to control debugging output from
 the lsst.meas.astrom.astrom module.
 
